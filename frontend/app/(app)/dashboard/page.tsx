@@ -77,7 +77,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ===== LINHA 2 (restante da viewport) ===== */}
-      <div className="grid grid-cols-12 gap-3 h-[calc(35vh-15px)] mt-3 mb-[15px] min-h-0">
+      <div className="grid grid-cols-12 gap-3 h-[calc(39vh-15px)] mt-3 mb-[15px] min-h-0">
         {/* Sankey (5 col) */}
         <div className="col-span-5 min-h-0">
           <div className="card-glass h-full overflow-hidden p-3 flex flex-col">
