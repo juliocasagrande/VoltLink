@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic', 
     'django.contrib.staticfiles',
     'corsheaders',
-    'rest_framework',
 
     "django.contrib.admin",
     "django.contrib.auth",
