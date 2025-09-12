@@ -26,7 +26,7 @@ export function useInfiniteAtividades(filters: AtivFilters) {
   if (filters.responsavel && toCsv(filters.responsavel)) params.responsavel = toCsv(filters.responsavel)
   if (filters.search) params.search = filters.search
 
-  params.page_size = "20"
+  params.page_size = "1000"
 
   return useInfiniteQuery({
     queryKey: ["atividades", params],   // muda quando filtros mudam (CSV estável)
