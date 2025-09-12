@@ -1,111 +1,152 @@
+// components/atividades/FiltersSidebar.tsx
 "use client"
-import { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { usePessoas } from "@/hooks/useInfiniteAtividades"
 
-type Props = {
-  onApply: (f: {
-    urgencia?: string
-    importancia?: string          // <-- garantimos o nome
-    status?: string
-    responsavel?: string          // <-- garantimos o nome
-    search?: string
-  }) => void
-  onClear: () => void
+import { Eraser, Filter } from "lucide-react"
+
+type Filters = {
+  search?: string
+  urgencia?: string[]
+  importancia?: string[]
+  status?: string[]
+  responsavel?: string[]
 }
 
-export default function FiltersSidebar({ onApply, onClear }: Props) {
-  const { data: pessoas = [] } = usePessoas()
+type Props = {
+  values: Filters
+  onChange: (f: Filters) => void
+  responsaveisOptions: string[]
+}
 
-  const [urgencia, setUrgencia] = useState("")
-  const [importancia, setImportancia] = useState("")   // <-- novo
-  const [status, setStatus] = useState("")
-  const [responsavel, setResponsavel] = useState("")   // <-- alinhado
-  const [search, setSearch] = useState("")
+const URGENCIA = ["Alta", "Média", "Baixa"]
+const IMPORTANCIA = ["Alta", "Média", "Baixa"]
+const STATUS = ["Não iniciado", "Em andamento", "Concluído"]
 
-  const respOptions = useMemo(
-    () => Array.from(new Set(pessoas.map(p => p.nome).filter(Boolean))).sort(),
-    [pessoas]
-  )
-
-  function apply() {
-    onApply({
-      urgencia: urgencia || undefined,
-      importancia: importancia || undefined,
-      status: status || undefined,
-      responsavel: responsavel || undefined,
-      search: search || undefined,
-    })
+export default function FiltersSidebar({ values, onChange, responsaveisOptions }: Props) {
+  const toggle = (key: keyof Filters, val: string) => {
+    const set = new Set((values[key] as string[]) ?? [])
+    set.has(val) ? set.delete(val) : set.add(val)
+    onChange({ ...values, [key]: set.size ? Array.from(set) : undefined })
   }
 
-  function clear() {
-    setUrgencia("")
-    setImportancia("")
-    setStatus("")
-    setResponsavel("")
-    setSearch("")
-    onClear()
-  }
+  const clearAll = () =>
+    onChange({ search: undefined, urgencia: undefined, importancia: undefined, status: undefined, responsavel: undefined })
 
   return (
-    <aside className="card-glass p-3 w-[260px] shrink-0">
-      <div className="section-header mb-3 font-medium">Filtros</div>
-
-      <div className="space-y-3">
-        <div>
-          <label className="text-sm block mb-1">Busca</label>
-          <input className="h-9 w-full rounded-md border px-2"
-                 placeholder="nome, email, área…"
-                 value={search} onChange={(e)=>setSearch(e.target.value)} />
+    <aside className="w-72 shrink-0">
+      <div className="card-glass p-3">
+        {/* Cabeçalho */}
+        <div className="section-header mb-3 rounded-xl px-3 py-2 flex items-center justify-between">
+          <span className="inline-flex items-center gap-2 font-semibold">
+            <Filter className="h-4 w-4" />
+            Filtros
+          </span>
+          <button
+            type="button"
+            onClick={clearAll}
+            className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 hover:text-amber-800"
+            title="Limpar todos os filtros"
+          >
+            <Eraser className="h-4 w-4" />
+            Limpar
+          </button>
         </div>
 
-        <div>
-          <label className="text-sm block mb-1">Urgência</label>
-          <select className="h-9 w-full rounded-md border px-2"
-                  value={urgencia} onChange={(e)=>setUrgencia(e.target.value)}>
-            <option value="">Todas</option>
-            <option value="Alta">Alta</option>
-            <option value="Média">Média</option>
-            <option value="Baixa">Baixa</option>
-          </select>
-        </div>
+        <div className="space-y-4">
+          {/* Busca */}
+          <Section title="Busca">
+            <input
+              className="w-full h-10 rounded-lg border px-3 text-[0.95rem]"
+              placeholder="Buscar texto..."
+              defaultValue={values.search ?? ""}
+              onChange={(e) => onChange({ ...values, search: e.target.value || undefined })}
+            />
+          </Section>
 
-        <div>
-          <label className="text-sm block mb-1">Importância</label>
-          <select className="h-9 w-full rounded-md border px-2"
-                  value={importancia} onChange={(e)=>setImportancia(e.target.value)}>
-            <option value="">Todas</option>
-            <option value="Alta">Alta</option>
-            <option value="Média">Média</option>
-            <option value="Baixa">Baixa</option>
-          </select>
-        </div>
+          {/* Urgência */}
+          <Section title="Urgência">
+            <ChipGroup
+              options={URGENCIA}
+              selected={values.urgencia ?? []}
+              onToggle={(v) => toggle("urgencia", v)}
+            />
+          </Section>
 
-        <div>
-          <label className="text-sm block mb-1">Status</label>
-          <select className="h-9 w-full rounded-md border px-2"
-                  value={status} onChange={(e)=>setStatus(e.target.value)}>
-            <option value="">Todos</option>
-            <option value="Não iniciado">Não iniciado</option>
-            <option value="Em andamento">Em andamento</option>
-            <option value="Concluído">Concluído</option>
-          </select>
-        </div>
+          {/* Importância */}
+          <Section title="Importância">
+            <ChipGroup
+              options={IMPORTANCIA}
+              selected={values.importancia ?? []}
+              onToggle={(v) => toggle("importancia", v)}
+            />
+          </Section>
 
-        <div>
-          <label className="text-sm block mb-1">Responsável</label>
-          <select className="h-9 w-full rounded-md border px-2"
-                  value={responsavel} onChange={(e)=>setResponsavel(e.target.value)}>
-            <option value="">Todos</option>
-            {respOptions.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </div>
+          {/* Status */}
+          <Section title="Status">
+            <ChipGroup
+              options={STATUS}
+              selected={values.status ?? []}
+              onToggle={(v) => toggle("status", v)}
+            />
+          </Section>
 
-        <div className="flex gap-2 pt-1">
-          <Button onClick={apply} className="bg-emerald-600 hover:bg-emerald-700 text-white">Aplicar</Button>
-          <Button variant="secondary" onClick={clear}>Limpar</Button>
+          {/* Responsável */}
+          <Section title="Responsável">
+            <div className="max-h-48 overflow-auto pr-1">
+              <ChipGroup
+                options={responsaveisOptions}
+                selected={values.responsavel ?? []}
+                onToggle={(v) => toggle("responsavel", v)}
+              />
+            </div>
+          </Section>
         </div>
       </div>
     </aside>
+  )
+}
+
+/* ------------------------- Componentes de UI ------------------------- */
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-yellow-500 bg-white/70 p-3">
+      <div className="text-[0.95rem] font-semibold text-gray-800 mb-2">{title}</div>
+      {children}
+    </div>
+  )
+}
+
+function ChipGroup({
+  options,
+  selected,
+  onToggle,
+}: {
+  options: string[]
+  selected: string[]
+  onToggle: (val: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((op) => {
+        const active = selected.includes(op)
+        return (
+          <button
+            key={op}
+            type="button"
+            onClick={() => onToggle(op)}
+            className={[
+              "px-3 py-1.5 rounded-full border text-sm transition",
+              "focus:outline-none focus:ring-2 focus:ring-amber-300",
+              active
+                ? "bg-amber-100 border-amber-500 text-amber-800 shadow-sm"
+                : "bg-white/70 border-slate-200 text-slate-700 hover:bg-slate-50",
+            ].join(" ")}
+            title={op}
+          >
+            {op}
+          </button>
+        )
+      })}
+    </div>
   )
 }

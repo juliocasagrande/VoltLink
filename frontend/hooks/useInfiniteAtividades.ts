@@ -7,34 +7,32 @@ import type { Atividade, Pessoa } from "@/lib/types"
 // Tipos e filtros
 // ------------------------------
 export type AtivFilters = {
-  urgencia?: string
-  importancia?: string
-  status?: string
-  responsavel?: string
+  urgencia?: string[] | string
+  importancia?: string[] | string
+  status?: string[] | string
+  responsavel?: string[] | string
   search?: string
 }
 
-type Page = { results: Atividade[]; next: string | null }
-
-// ------------------------------
-// Lista paginada de atividades
-// ------------------------------
 export function useInfiniteAtividades(filters: AtivFilters) {
   const params: Record<string, string> = {}
-  if (filters.urgencia) params.urgencia = filters.urgencia
-  if (filters.importancia) params.importancia = filters.importancia
-  if (filters.status) params.status = filters.status
-  if (filters.responsavel) params.responsavel = filters.responsavel
+
+  const toCsv = (v?: string[] | string) =>
+    Array.isArray(v) ? v.filter(Boolean).join(",") : (v ?? "")
+
+  if (filters.urgencia && toCsv(filters.urgencia))     params.urgencia = toCsv(filters.urgencia)
+  if (filters.importancia && toCsv(filters.importancia)) params.importancia = toCsv(filters.importancia)
+  if (filters.status && toCsv(filters.status))         params.status = toCsv(filters.status)
+  if (filters.responsavel && toCsv(filters.responsavel)) params.responsavel = toCsv(filters.responsavel)
   if (filters.search) params.search = filters.search
+
   params.page_size = "20"
 
-  return useInfiniteQuery<Page>({
-    queryKey: ["atividades", params],
+  return useInfiniteQuery({
+    queryKey: ["atividades", params],   // muda quando filtros mudam (CSV estável)
     queryFn: async ({ pageParam }) => {
-      const res = await api.get("/atividades/", {
-        params: { ...params, page: pageParam ?? 1 },
-      })
-      return res.data as Page
+      const res = await api.get("/atividades/", { params: { ...params, page: pageParam ?? 1 } })
+      return res.data
     },
     initialPageParam: 1 as number,
     getNextPageParam: (lastPage, all) =>

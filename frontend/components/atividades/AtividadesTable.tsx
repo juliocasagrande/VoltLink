@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button"
 import type { Atividade } from "@/lib/types"
 import { Pencil, Trash2, Plus } from "lucide-react"
 
+// components/atividades/AtividadesTable.tsx  (apenas cabeçalho do arquivo)
+type FilterValues = {
+  urgencia?: string[]; importancia?: string[]; status?: string[]; responsavel?: string[]; search?: string;
+}
+
 type Props = {
   data: Atividade[]
   onEdit: (a: Atividade) => void
@@ -13,6 +18,7 @@ type Props = {
   isFetchingNextPage: boolean
   hasNextPage?: boolean
 }
+
 
 function levelBadge(level?: string) {
   const base = "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium text-white"
@@ -47,13 +53,7 @@ function quadranteBadge(q?: string) {
 }
 
 export default function AtividadesTable({
-  data,
-  onEdit,
-  onDelete,
-  onCreate,
-  sentinelRef,
-  isFetchingNextPage,
-  hasNextPage,
+  data, onEdit, onDelete, onCreate, sentinelRef, isFetchingNextPage, hasNextPage
 }: Props) {
   return (
     <div className="card-glass">
@@ -81,6 +81,7 @@ export default function AtividadesTable({
               <th className="px-4 py-2 text-right"></th>
             </tr>
           </thead>
+
           <tbody className="[&>tr]:border-t">
             {data.map((a) => (
               <tr key={a.id} className="[&>td]:py-2 [&>td]:px-3 align-top">
@@ -125,5 +126,52 @@ export default function AtividadesTable({
       {isFetchingNextPage && <div className="px-3 pb-3 text-sm text-gray-500">Carregando…</div>}
       {!hasNextPage && <div className="px-3 pb-3 text-sm text-gray-500">Fim da lista</div>}
     </div>
+  )
+}
+
+function MultiCheck({
+  options,
+  values,
+  onChange,
+}: {
+  options: string[]
+  values: string[]
+  onChange: (vals: string[]) => void
+}) {
+  const toggle = (val: string) => {
+    const set = new Set(values)
+    set.has(val) ? set.delete(val) : set.add(val)
+    onChange(Array.from(set))
+  }
+
+  return (
+    <details className="relative">
+      <summary className="cursor-pointer select-none rounded border px-2 h-8 flex items-center">
+        {values.length ? `${values.length} selecionado(s)` : "Filtrar…"}
+      </summary>
+      <div className="absolute z-10 mt-1 w-56 rounded border bg-white p-2 shadow">
+        <div className="max-h-52 overflow-auto space-y-1">
+          {options.map((op) => (
+            <label key={op} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={values.includes(op)}
+                onChange={() => toggle(op)}
+              />
+              {op}
+            </label>
+          ))}
+        </div>
+        <div className="mt-2 flex justify-end gap-2">
+          <button
+            type="button"
+            className="text-xs underline"
+            onClick={() => onChange([])}
+          >
+            Limpar
+          </button>
+        </div>
+      </div>
+    </details>
   )
 }

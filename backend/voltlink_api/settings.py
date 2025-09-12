@@ -75,14 +75,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "voltlink_api.wsgi.application"
 
-# Banco de dados — SQLite (desenvolvimento local)
-DATABASES = {
-    "default": dj_database_url.config(
+# Banco de dados: usa Postgres se existir DATABASE_URL; caso contrário, SQLite local
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+SSL_REQUIRE = os.getenv("DJANGO_DB_SSL_REQUIRE", "True").lower() == "true"
+
+if DATABASE_URL:
+    # Produção (Railway / Postgres)
+    DATABASES = {
+        "default": dj_database_url.config(
         default=os.getenv("DATABASE_URL"),
         conn_max_age=600,
         ssl_require=True,  # Railway/Postgres com SSL
     )
-}
+    }
+else:
+    # Desenvolvimento local (SQLite)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # Senhas
 AUTH_PASSWORD_VALIDATORS = [

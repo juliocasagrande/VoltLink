@@ -1,3 +1,4 @@
+// app/%28app%29/atividades/page.tsx
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -13,7 +14,9 @@ import type { AtividadeForm } from "@/lib/schemas"
 import { useQueryClient } from "@tanstack/react-query"
 
 export default function AtividadesPage() {
-  const [filters, setFilters] = useState<{ urgencia?: string; status?: string; responsavel?: string}>({})
+  const [filters, setFilters] = useState<{
+    urgencia?: string[]; importancia?: string[]; status?: string[]; responsavel?: string[]; search?: string;
+  }>({})
 
   const {
     data,
