@@ -1,1 +1,0 @@
-web: gunicorn backend/voltlink_api.wsgi
