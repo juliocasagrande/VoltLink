@@ -1,0 +1,72 @@
+/* globals.css */
+/* Tailwind v4 – importa tudo (preflight + utilities + theme) */
+@import "tailwindcss";
+
+/* =========================
+   Variáveis (shadcn / tema)
+   ========================= */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 47.4% 11.2%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 47.4% 11.2%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 47.4% 11.2%;
+
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+}
+
+/* =========================
+   Tema VoltLink (fundo)
+   ========================= */
+html, body { min-height: 100%; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% 10%, rgba(255, 235, 119, 0.35), transparent 60%),
+    radial-gradient(900px 500px at 10% 80%, rgba(255, 235, 119, 0.25), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, rgba(255, 235, 119, 0.12) 100%);
+  color: rgb(17 24 39); /* gray-900 */
+}
+
+/* =========================
+   Utilitários do VoltLink
+   ========================= */
+.card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 1rem; /* ~ rounded-2xl */
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+}
+
+/* Cabeçalhos translúcidos consistentes */
+.section-header {
+  background-color: rgba(239, 209, 109, 0.534); /* bg-white/70 */
+  border: 1px solid #e5e7eb; /* border (gray-200) */
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.07), 0 1px 2px 0 rgba(0,0,0,0.06); /* shadow-soft approximation */
+  padding-left: 0.75rem; /* px-3 */
+  padding-right: 0.75rem; /* px-3 */
+  padding-top: 0.5rem; /* py-2 */
+  padding-bottom: 0.5rem; /* py-2 */
+}

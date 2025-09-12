@@ -1,0 +1,1 @@
+web: bash -lc 'node -v && npm -v && npm ci --omit=dev && npm run build && npm run start -- -p $PORT'
