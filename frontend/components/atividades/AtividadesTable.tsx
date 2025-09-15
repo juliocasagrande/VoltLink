@@ -1,13 +1,7 @@
-// components/atividades/AtividadesTable.tsx
 "use client"
 import { Button } from "@/components/ui/button"
 import type { Atividade } from "@/lib/types"
-import { Pencil, Trash2, Plus } from "lucide-react"
-
-// components/atividades/AtividadesTable.tsx  (apenas cabeçalho do arquivo)
-type FilterValues = {
-  urgencia?: string[]; importancia?: string[]; status?: string[]; responsavel?: string[]; search?: string;
-}
+import { Pencil, Trash2, Plus, ChevronUp, ChevronDown, Minus } from "lucide-react"
 
 type Props = {
   data: Atividade[]
@@ -17,9 +11,11 @@ type Props = {
   sentinelRef: (el: HTMLDivElement | null) => void
   isFetchingNextPage: boolean
   hasNextPage?: boolean
+  ordering: string | null
+  onToggleOrdering?: (field: string) => void // opcional por segurança
 }
 
-
+/* Badges simples (cores já usadas no projeto) */
 function levelBadge(level?: string) {
   const base = "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium text-white"
   if (level === "Alta")   return <span className={`${base} bg-rose-600`}>Alta</span>
@@ -30,7 +26,7 @@ function levelBadge(level?: string) {
 
 function statusBadge(level?: string) {
   const base = "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium text-white"
-  if (level === "Concluído")   return <span className={`${base} bg-green-500`}>Concluído</span>
+  if (level === "Concluído")     return <span className={`${base} bg-green-500`}>Concluído</span>
   if (level === "Em andamento")  return <span className={`${base} bg-blue-500`}>Em andamento</span>
   if (level === "Não iniciado")  return <span className={`${base} bg-orange-400`}>Não iniciado</span>
   return <span className={`${base} bg-slate-400`}>{level ?? "-"}</span>
@@ -39,22 +35,47 @@ function statusBadge(level?: string) {
 function quadranteBadge(q?: string) {
   const base = "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium text-white"
   switch (q) {
-    case "Q1":
-      return <span className={`${base} bg-rose-600`}>Q1</span>     // danger
-    case "Q2":
-      return <span className={`${base} bg-amber-500`}>Q2</span>   // warning
-    case "Q3":
-      return <span className={`${base} bg-sky-600`}>Q3</span>     // primary
-    case "Q4":
-      return <span className={`${base} bg-cyan-600`}>Q4</span>    // info
-    default:
-      return <span className={`${base} bg-slate-400`}>{q ?? "-"}</span>
+    case "Q1": return <span className={`${base} bg-rose-600`}>Q1</span>
+    case "Q2": return <span className={`${base} bg-amber-500`}>Q2</span>
+    case "Q3": return <span className={`${base} bg-sky-600`}>Q3</span>
+    case "Q4": return <span className={`${base} bg-cyan-600`}>Q4</span>
+    default:   return <span className={`${base} bg-slate-400`}>{q ?? "-"}</span>
   }
 }
 
+function SortButton({
+  field, label, ordering, onToggle, align = "left",
+}: {
+  field: string
+  label: string
+  ordering: string | null
+  onToggle?: (f: string) => void
+  align?: "left" | "right"
+}) {
+  const isAsc = ordering === field
+  const isDesc = ordering === "-" + field
+  const Icon = isAsc ? ChevronUp : isDesc ? ChevronDown : Minus
+  const tint = isAsc || isDesc ? "text-amber-700" : "text-slate-500"
+
+  return (
+    <button
+      type="button"
+      className={`inline-flex items-center gap-1 hover:underline ${align === "right" ? "justify-end" : ""}`}
+      onClick={() => onToggle?.(field)}
+      title={`Ordenar por ${label}`}
+    >
+      <span>{label}</span>
+      <Icon className={`h-4 w-4 ${tint}`} />
+    </button>
+  )
+}
+
 export default function AtividadesTable({
-  data, onEdit, onDelete, onCreate, sentinelRef, isFetchingNextPage, hasNextPage
+  data, onEdit, onDelete, onCreate, sentinelRef, isFetchingNextPage, hasNextPage,
+  ordering, onToggleOrdering,
 }: Props) {
+  const safeToggle = onToggleOrdering ?? (() => {})
+
   return (
     <div className="card-glass">
       <div className="section-header m-3 flex items-center justify-between h-[42px] px-4 rounded-t-xl">
@@ -67,18 +88,36 @@ export default function AtividadesTable({
 
       <div className="overflow-x-auto m-3 pt-0">
         <table className="w-full text-sm">
-          <thead>
+          <thead className="sticky top-0 z-10">
             <tr className="text-left text-sm bg-gray-100">
-              <th className="px-4 py-2">Demanda</th>
-              <th className="px-4 py-2">Área/Cliente</th>
-              <th className="px-4 py-2">Localidade</th>
-              <th className="px-4 py-2">Responsáveis</th>
-              <th className="px-4 py-2">Prazo</th>
-              <th className="px-4 py-2">Urgência</th>
-              <th className="px-4 py-2">Importância</th>
-              <th className="px-4 py-2">Quadrante</th>
-              <th className="px-4 py-2">Status</th>
-              <th className="px-4 py-2 text-right"></th>
+              <th className="px-4 py-2">
+                <SortButton field="demanda" label="Demanda" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2">
+                <SortButton field="area_solicitante" label="Área/Cliente" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2">
+                <SortButton field="localidade" label="Localidade" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2">
+                <SortButton field="responsaveis" label="Responsáveis" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2">
+                <SortButton field="prazo" label="Prazo" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2">
+                <SortButton field="urgencia" label="Urgência" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2">
+                <SortButton field="importancia" label="Importância" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2">
+                <SortButton field="quadrante" label="Quadrante" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2">
+                <SortButton field="status" label="Status" ordering={ordering} onToggle={safeToggle} />
+              </th>
+              <th className="px-4 py-2 text-right">Ações</th>
             </tr>
           </thead>
 
@@ -86,34 +125,20 @@ export default function AtividadesTable({
             {data.map((a) => (
               <tr key={a.id} className="[&>td]:py-2 [&>td]:px-3 align-top">
                 <td className="max-w-[520px]">{a.demanda}</td>
-                <td className="px-4 py-2">{a.area_solicitante}</td>
-                <td className="px-4 py-2">{a.localidade}</td>
-                <td>{a.responsaveis?.split(";").map(s=>s.trim()).filter(Boolean).join(", ")}</td>
+                <td>{a.area_solicitante}</td>
+                <td>{a.localidade}</td>
+                <td>{a.responsaveis?.split(";").map(s => s.trim()).filter(Boolean).join(", ")}</td>
                 <td>{a.prazo ? new Date(a.prazo).toLocaleDateString() : "-"}</td>
                 <td>{levelBadge(a.urgencia ?? undefined)}</td>
                 <td>{levelBadge(a.importancia ?? undefined)}</td>
                 <td>{quadranteBadge(a.quadrante ?? undefined)}</td>
                 <td>{statusBadge(a.status ?? undefined)}</td>
                 <td className="text-right space-x-1">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => onEdit(a)}
-                    className="text-slate-700 hover:text-slate-900"
-                    aria-label="Editar"
-                    title="Editar"
-                  >
+                  <Button size="icon" variant="ghost" onClick={() => onEdit(a)} aria-label="Editar" title="Editar">
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => onDelete(a)}
-                    className="text-rose-600 hover:text-rose-700"
-                    aria-label="Excluir"
-                    title="Excluir"
-                  >
-                    <Trash2 className="h-4 w-4" />
+                  <Button size="icon" variant="ghost" onClick={() => onDelete(a)} aria-label="Excluir" title="Excluir">
+                    <Trash2 className="h-4 w-4 text-rose-600" />
                   </Button>
                 </td>
               </tr>
@@ -126,52 +151,5 @@ export default function AtividadesTable({
       {isFetchingNextPage && <div className="px-3 pb-3 text-sm text-gray-500">Carregando…</div>}
       {!hasNextPage && <div className="px-3 pb-3 text-sm text-gray-500">Fim da lista</div>}
     </div>
-  )
-}
-
-function MultiCheck({
-  options,
-  values,
-  onChange,
-}: {
-  options: string[]
-  values: string[]
-  onChange: (vals: string[]) => void
-}) {
-  const toggle = (val: string) => {
-    const set = new Set(values)
-    set.has(val) ? set.delete(val) : set.add(val)
-    onChange(Array.from(set))
-  }
-
-  return (
-    <details className="relative">
-      <summary className="cursor-pointer select-none rounded border px-2 h-8 flex items-center">
-        {values.length ? `${values.length} selecionado(s)` : "Filtrar…"}
-      </summary>
-      <div className="absolute z-10 mt-1 w-56 rounded border bg-white p-2 shadow">
-        <div className="max-h-52 overflow-auto space-y-1">
-          {options.map((op) => (
-            <label key={op} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={values.includes(op)}
-                onChange={() => toggle(op)}
-              />
-              {op}
-            </label>
-          ))}
-        </div>
-        <div className="mt-2 flex justify-end gap-2">
-          <button
-            type="button"
-            className="text-xs underline"
-            onClick={() => onChange([])}
-          >
-            Limpar
-          </button>
-        </div>
-      </div>
-    </details>
   )
 }

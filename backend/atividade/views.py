@@ -12,8 +12,19 @@ class AtividadeViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = AtividadeFilter
     search_fields = ["demanda", "responsaveis", "observacoes", "area_solicitante", "cliente__area"]
-    ordering_fields = ["prazo", "criado_em", "atualizado_em"]
-    ordering = ["-criado_em"]
+    ordering_fields = [
+        "demanda",
+        "area_solicitante",
+        "localidade",
+        "responsaveis",
+        "prazo",
+        "urgencia",
+        "importancia",
+        "quadrante",
+        "status",
+        "id",
+    ]
+    ordering = ["-prazo"]
 
 class ComentarioViewSet(viewsets.ModelViewSet):
     queryset = Comentario.objects.select_related("atividade").all()
