@@ -80,7 +80,8 @@ export default function BarrasPorResponsavel({ data }: Props) {
           <YAxis
             type="category"
             dataKey="name"
-            width={140}                 // espaço fixo para os nomes
+            width={160}    
+            interval={0}    
             axisLine={false}
             tickLine={false}
             tickMargin={6}
