@@ -68,7 +68,7 @@ export default function BarrasPorResponsavel({ data }: Props) {
         <BarChart
           data={counts}
           layout="vertical" // barras horizontais
-          margin={{ top: 8, right: 16, bottom: 8, left: 8 }}
+          margin={{ top: 8, right: 48, bottom: 8, left: 8 }}
           barCategoryGap={8}
         >
           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
@@ -80,7 +80,7 @@ export default function BarrasPorResponsavel({ data }: Props) {
           <YAxis
             type="category"
             dataKey="name"
-            width={160}    
+            width={100}    
             interval={0}    
             axisLine={false}
             tickLine={false}
